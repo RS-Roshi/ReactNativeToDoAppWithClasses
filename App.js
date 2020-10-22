@@ -1,114 +1,95 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
 
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-} from 'react-native';
+import { StyleSheet, View, Text, Button, FlatList, Alert, TextInput, TouchableOpacity } from 'react-native';
+import Header from './components/header';
+import ListItem from './components/ListItem';
+import { v4 as uuidv4 } from 'uuid';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 
-const App: () => React$Node = () => {
-  return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
-  );
-};
+export default class App extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			text: '',
+			items: [
+				{ id: uuidv4(), name: 'Apple' },
+				{ id: uuidv4(), name: 'Banana' },
+				{ id: uuidv4(), name: 'Grapes' },
+			]
+		};
+		this.deleteItem = this.deleteItem.bind(this);
+	}
+
+	deleteItem = (id) => {
+		// console.log('id:', id)
+		this.setState(prevState => {
+			let { items } = prevState;
+			
+			return { items: items.filter(item => item.id != id) };
+		});
+	};
+
+	addItem = (text) => {
+		console.log('text:', text)
+		let notEmpty = text.trim().length > 0;
+
+		if (notEmpty) {
+
+			this.setState(
+				prevState => {
+					let { items } = prevState;
+					return {
+						items: items.concat({id: uuidv4(),name: text}),
+						text: ""
+					};
+				}
+			);
+		} else {
+			Alert.alert('Invalid Input', 'Enter Item Name First');
+		}
+		
+	}
+
+	render() {
+		return (
+			<View style={styles.container}>
+				<Header title='ToDo App with Class' />
+				<TextInput style={styles.input} placeholder="Enter Item Name" onChangeText={(val) => this.state.text = val}></TextInput>
+				<TouchableOpacity style={styles.btn} onPress={() => this.addItem(this.state.text)}>
+					<Text style={styles.btnText} >
+						Add Item
+					</Text>
+				</TouchableOpacity>
+				<FlatList
+					data={this.state.items}
+					renderItem={({ item }) => <ListItem item={item} deleteItem={this.deleteItem} />}
+					keyExtractor={item => item.id}
+				></FlatList>
+			</View>
+		);
+	}
+}
 
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
-  },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+	container: {
+		flex: 1,
 
-export default App;
+	},
+	input: {
+		height: 60,
+		padding: 8,
+		fontSize: 16,
+	},
+	btn: {
+		backgroundColor: '#e9c46a',
+		padding: 8,
+		margin: 5,
+		borderRadius: 10,
+	},
+	btnText: {
+		color: '#264653',
+		fontSize: 20,
+		padding: 8,
+		textAlign: 'center',
+	}
+});
